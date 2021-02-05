@@ -1,11 +1,13 @@
+import re
+from pathlib import Path
+
 import pandas as pd
 import simplekml
-from pathlib import Path
+
 import settings
 from configs import get_patterns
-from header_getter import HeaderResolver
 from extract_and_rename import unzip_files
-import re
+from header_getter import HeaderResolver
 
 base_path = Path(__file__).parent.resolve(strict=True)
 
@@ -41,9 +43,7 @@ def kml_gen(
     for legend_style in conf.legend:
         sharedstyle = simplekml.Style()
         sharedstyle.iconstyle.scale = 0.4
-        sharedstyle.iconstyle.icon.href = (
-            "http://10.99.94.100/media/StF/Measurement/static/legend/dot.png"
-        )
+        sharedstyle.iconstyle.icon.href = settings.ICON
         sharedstyle.labelstyle.scale = 0.8
         sharedstyle.iconstyle.color = legend_style[1]
         sharedstyle.labelstyle.color = legend_style[1]
@@ -60,7 +60,8 @@ def kml_gen(
             pnt = kml.newpoint(
                 name=f"{row[conf.param]:g}",
                 coords=[(row[longitude], row[latitude])],
-                description=f"{conf.channel}: {int(row[conf.channel])}\n{conf.bsic_sc_pci}: {cell_ph_id}",
+                description=f"{conf.channel}: {int(row[conf.channel])}"
+                + f"\n{conf.bsic_sc_pci}: {cell_ph_id}",
             )
         else:
             pnt = kml.newpoint(
@@ -104,7 +105,7 @@ def from_txt_to_kml(txt_file, duplicate_pattern_name=None):
     if duplicate_pattern_name:
         df = add_duplicate_column(df, duplicate_pattern_name)
     patterns = get_patterns()
-    resolver = HeaderResolver(df.columns, patterns, "PCI_PARAM")
+    resolver = HeaderResolver(df.columns, patterns, duplicate_pattern_name)
     coordinates = resolver.choose_coordinates_headers()
     confs = resolver.fill_confs()
     for conf in confs:
@@ -113,7 +114,7 @@ def from_txt_to_kml(txt_file, duplicate_pattern_name=None):
 
 if __name__ == "__main__":
     unzip_files()
-    duplicate_pattern_name = ("Cell", "PCI_PARAM")
+    duplicate_pattern_name = None  # ("Cell", "PCI_PARAM")
     for file in base_path.joinpath(settings.INPUT_LOGS_FOLDER).iterdir():
         if file.suffix in (".txt", ".TXT"):
             from_txt_to_kml(file, duplicate_pattern_name)

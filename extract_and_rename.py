@@ -1,5 +1,6 @@
-from zipfile import ZipFile
 import pathlib
+from zipfile import ZipFile
+
 import settings
 
 base_path = pathlib.Path(__file__).parent.resolve(strict=True)
@@ -20,8 +21,8 @@ def unzip_files():
                 for file in myzip.namelist():
                     myzip.extract(file)
                     extracted_file = pathlib.Path(file)
-                    new_name = extracted_file.parent.joinpath(
-                        name
-                    ).with_suffix(".txt")
+                    new_name = working_folder.joinpath(name).with_suffix(
+                        ".txt"
+                    )
                     extracted_file.rename(new_name)
             path_object.unlink()

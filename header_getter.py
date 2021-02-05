@@ -1,7 +1,7 @@
 import logging
 import re
 from collections import namedtuple
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 import configs
 
@@ -15,13 +15,16 @@ class HeaderResolver:
         self,
         column_headers: List[str],
         patterns: Dict,
-        specific_pattern: str = None,
+        specific_pattern: Optional[Tuple[str, str]] = None,
     ):
         self.column_headers = column_headers
         self.column_headers_to_search = list(column_headers)
         self.patterns = patterns
         self.confs = list()
-        self.specific_pattern = specific_pattern
+        if specific_pattern:
+            self.specific_pattern = specific_pattern[1]
+        else:
+            self.specific_pattern = specific_pattern
 
     def searching(self, pattern):
         for header in self.column_headers_to_search:
