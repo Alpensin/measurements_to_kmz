@@ -1,0 +1,4 @@
+files_to_convert/*
+result/*
+__pycache__/
+.mypy_cache/
