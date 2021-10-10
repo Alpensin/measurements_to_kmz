@@ -1,5 +1,6 @@
-import legends as __legends
 from collections import namedtuple as __namedtuple
+
+import legends as __legends
 
 LONGITUDE_PATTERNS = ("Lon.", "Longitude")
 LATITUDE_PATTERNS = ("Lat.", "Latitude")
@@ -31,6 +32,9 @@ _params = (__Param(*i) for i in __param_options)
 
 PARAMETER_PATTERNS = dict((param.pattern, param) for param in _params)
 
+REVERSED_LEGENDS = ("RxQual Sub",)
+
+ONE_COLORS = ("PCI_PARAM",)
 
 def get_patterns():
     return dict((k, v) for k, v in globals().items() if "_PATTERNS" in k)

@@ -5,7 +5,7 @@ import pandas as pd
 import simplekml
 
 import settings
-from configs import get_patterns
+from configs import ONE_COLORS, REVERSED_LEGENDS, get_patterns
 from extract_and_rename import unzip_files
 from header_getter import HeaderResolver
 
@@ -38,13 +38,19 @@ def kml_gen(
             ["lonbin", "latbin", conf.bsic_sc_pci], as_index=False
         )[[conf.param, longitude, latitude]].mean()
         to_kml = groups[[longitude, latitude, conf.bsic_sc_pci, conf.param]]
-    to_kml = to_kml.round({conf.param: 1, longitude: 5, latitude: 5})
+    to_kml = to_kml.round(
+        {
+            conf.param: 1,
+            longitude: settings.COORDS_ROUND_SYMBOLS,
+            latitude: settings.COORDS_ROUND_SYMBOLS,
+        }
+    )
     styles = list()
     for legend_style in conf.legend:
         sharedstyle = simplekml.Style()
-        sharedstyle.iconstyle.scale = 0.4
+        sharedstyle.iconstyle.scale = settings.ICONSTYLE_SCALE
         sharedstyle.iconstyle.icon.href = settings.ICON
-        sharedstyle.labelstyle.scale = 0.8
+        sharedstyle.labelstyle.scale = settings.LABELSTYLE_SCALE
         sharedstyle.iconstyle.color = legend_style[1]
         sharedstyle.labelstyle.color = legend_style[1]
         styles.append((legend_style[0], sharedstyle))
@@ -69,12 +75,12 @@ def kml_gen(
                 coords=[(row[longitude], row[latitude])],
                 description=f"{conf.bsic_sc_pci}: {cell_ph_id}",
             )
-        if conf.param in ("RxQual Sub",):
+        if conf.param in REVERSED_LEGENDS:
             for style in styles:
                 if row[conf.param] >= style[0]:
                     pnt.style = style[1]
                     break
-        elif conf.param in ("PCI_PARAM",):
+        elif conf.param in ONE_COLORS:
             pnt.style = styles[int(row[conf.param])][1]
         else:
             for style in styles:
@@ -116,5 +122,5 @@ if __name__ == "__main__":
     unzip_files()
     duplicate_pattern_name = None  # ("Cell", "PCI_PARAM")
     for file in base_path.joinpath(settings.INPUT_LOGS_FOLDER).iterdir():
-        if file.suffix in (".txt", ".TXT"):
+        if file.suffix.lower() == ".txt":
             from_txt_to_kml(file, duplicate_pattern_name)
